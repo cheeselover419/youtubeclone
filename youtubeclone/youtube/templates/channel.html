@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    img {
+        width:200px;
+    }
+
+
+</style>
+
+<div>
+    <img src="{{channel.profile_picture.url}}" alt="{{chanel.name}}">
+    <div>
+        <p>{{channel.name}}</p>
+        <p>{{channel.subscribers.count}} subscribers</p>
+    </div>
+
+    {% if request.user.is_authenticated %}
+
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="channel_id" value="{{channel.id}}">
+
+            {% if request.user in channel.subscribers.all %}
+                <button type="submit" name="subscribe" value="unsubscribe">Unsubscribe</button>
+
+            {% else %}
+                <button type="submit" name="subscribe" value="subscribe">Subscribe</button>
+
+            {% endif %}
+        </form>
+    {% endif %}
+</div>
+
+
+{% endblock %}
