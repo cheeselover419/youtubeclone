@@ -2,12 +2,6 @@
 
 {% block content %}
 
-<style>
-    h1 {
-        color: red;
-    }
-</style>
-
 <div>
     <h1>Create user</h1>
     <form method="post" action="{% url  'create-user' %}">
@@ -16,7 +10,7 @@
         <button type="submit">Create user</button>
     </form>
 
-    <p>Already have an accout? Log in <a href="{% url 'login' %}" here.</p>
+    <p>Already have an accout? Log in <a href="{% url 'login' %}">here.</a> </p>
 </div>
 
 {% endblock %}

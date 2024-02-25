@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    img {
+        width:200px;
+    }
+
+
+</style>
+
+<form method="POST" action="{% url 'create-channel' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="text" placeholder="Channel name" name="channelName">
+    <br>
+    <label>Chose PFP</label>
+    <input type="file" accept="image/*" name="channel_pfp">
+
+    <button type="submit">Submit</button>
+</form>
+
+
+{% endblock %}
