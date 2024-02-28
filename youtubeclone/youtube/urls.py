@@ -8,7 +8,13 @@ urlpatterns = [
     path('create-user', views.create_user, name='create-user'),
     path('login', views.custom_login, name='login'),
     path('logout', views.custom_logout, name='logout'),
+    path('create-channel', views.create_channel, name='create-channel'),
 
     path('channel/<str:username>/<int:pk>', views.channel, name='channel'),
-    path('create-channel', views.create_channel, name='create-channel')
+    path('video/<int:pk>', views.video, name='video'),
+
+    path('video-view/<int:pk>', views.video_view, name='video-view'),
+    path('video-like/<int:pk>', views.video_like, name='video-like'),
+    path('video-dislike/<int:pk>', views.video_dislike, name='video-dislike'),
+
 ]
