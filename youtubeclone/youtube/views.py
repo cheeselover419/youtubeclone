@@ -4,14 +4,16 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 
-from .models import Channel, Video
+from .models import Channel, Video, Comment
 
 
 # Create your views here.
 
 def home(request):
-    return render(request, 'home.html')
 
+    videos = Video.objects.all().order_by('-upload_time')
+
+    return render(request, 'home.html', {'videos': videos})
 
 def create_user(request):
     if request.method == 'POST':
@@ -52,7 +54,7 @@ def custom_logout(request):
 def channel(request, username, pk):
     user = User.objects.get(username=username)
     channel = Channel.objects.get(user=user, id=pk)
-    videos = Video.objects.filter(channel=channel().order_by('-upload_time'))
+    videos = Video.objects.filter(channel=channel).order_by('-upload_time')
 
     if request.method == 'POST':
         action = request.POST['subscribe']
@@ -103,7 +105,7 @@ def upload_video(request):
             video_file = request.FILES.get('video_file')
             title = request.POST['video_title']
             description = request.POST['video_description']
-            thumbnail = request.POST['video_thumbnail']
+            thumbnail = request.FILES.get('video_thumbnail')
 
             if channel and video_file and title and thumbnail:
                 video = Video(user=request.user, channel=channel,
@@ -124,7 +126,7 @@ def upload_video(request):
 
 def video_view(request, pk):
     if request.user.is_authenticated:
-        vide = Video.objects.get(id=pk)
+        video = Video.objects.get(id=pk)
 
         if not video.view.filter(id=request.user.id):
             video.view.add(request.user)
@@ -165,3 +167,25 @@ def video_dislike(request, pk):
     else:
         return redirect('login')
 
+
+def searched(request):
+    if request.method == "POST":
+        searched_value = request.POST['s']
+        ##videos = Video.objects.filter(title__contais=searched_value)
+        channels = Channel.objects.filter(name__contains=searched_value)
+
+        return render(request, 'searched.html', {'channels': channels})
+
+
+def video_comment(request, pk):
+    if request.user.is_authenticated:
+        video = Video.objects.get(id=pk)
+
+        if request.method == "POST":
+            comment_text = request.POST['comment']
+            comment = Comment.objects.create(user=request.user, video=video, text=comment_text)
+
+        return redirect('video', pk=pk)
+
+    else:
+        return redirect("login")

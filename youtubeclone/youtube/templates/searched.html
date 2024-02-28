@@ -22,9 +22,35 @@
         height: 150px;
         object-fit: cover;
     }
+
+    .channel-container {
+        margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        align-items: flex-start;
+    }
+
+    button {
+        margin-bottom: 10px;
+        margin-left: 10px;
+    }
 </style>
 
-<br>
+<div class="channel-container">
+    {% for channel in channels %}
+    <a class="card" href="{% url 'channel' username=channel.user.username pk=channel.id %}">
+            <img src="{{channel.profile_picture.url}}" class="card-img-top" alt="{{channel.name}}">
+            <div class="card-body">
+            <h5 class="card-title">{{channel.name}}</h5>
+            <p class="card-text">{{channel.subscribers.count}} subscribers</p>
+            </div>
+        </a>
+    {% endfor %}
+</div>
+
+<br><br>
 
 <div class="video-container">
 
@@ -41,6 +67,4 @@
     {% endfor %}
 
 </div>
-
-
 {% endblock %}
