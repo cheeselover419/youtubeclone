@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
+
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 
-from .models import Channel
+from .models import Channel, Video
 
 
 # Create your views here.
@@ -51,6 +52,7 @@ def custom_logout(request):
 def channel(request, username, pk):
     user = User.objects.get(username=username)
     channel = Channel.objects.get(user=user, id=pk)
+    videos = Video.objects.filter(channel=channel().order_by('-upload_time'))
 
     if request.method == 'POST':
         action = request.POST['subscribe']
@@ -62,7 +64,7 @@ def channel(request, username, pk):
 
         channel.save()
 
-    return render(request, 'channel.html', {'channel': channel})
+    return render(request, 'channel.html', {'channel': channel, 'videos': videos})
 
 
 def create_channel(request):
@@ -83,3 +85,83 @@ def create_channel(request):
         return redirect('login')
 
     return render(request, 'create_channel.html')
+
+
+def video(request, pk):
+    video = Video.objects.get(id=pk)
+    return render(request, 'video.html', {"video": video})
+
+def upload_video(request):
+    if request.user.is_authenticated:
+        channels = Channel.objects.filter(user=request.user)
+
+        if request.method == "POST":
+            channel_id = request.POST['video_channel']
+
+            channel = Channel.objects.get(id=channel_id)
+
+            video_file = request.FILES.get('video_file')
+            title = request.POST['video_title']
+            description = request.POST['video_description']
+            thumbnail = request.POST['video_thumbnail']
+
+            if channel and video_file and title and thumbnail:
+                video = Video(user=request.user, channel=channel,
+                              video_file=video_file,
+                              title=title, description=description,
+                              thumbnail=thumbnail)
+                video.save()
+
+                return redirect('home')
+
+        else:
+            return render(request, 'upload_video.html', {'channels': channels})
+
+    else:
+        return redirect('login')
+
+    return render(request, 'upload_video.html', {'channels': channels})
+
+def video_view(request, pk):
+    if request.user.is_authenticated:
+        vide = Video.objects.get(id=pk)
+
+        if not video.view.filter(id=request.user.id):
+            video.view.add(request.user)
+
+        return redirect('video', pk=pk)
+
+    else:
+        return redirect('login')
+
+
+def video_like(request, pk):
+    if request.user.is_authenticated:
+        video = Video.objects.get(id=pk)
+
+        if not video.dislikes.filter(id=request.user.id):
+            if video.likes.filter(id=request.user.id):
+                video.likes.remove(request.user)
+            else:
+                video.likes.add(request.user)
+
+        return redirect('video', pk=pk)
+
+    else:
+        return redirect('login')
+
+
+def video_dislike(request, pk):
+    if request.user.is_authenticated:
+        video = Video.objects.get(id=pk)
+
+        if not video.likes.filter(id=request.user.id):
+            if video.dislikes.filter(id=request.user.id):
+                video.dislikes.remove(request.user)
+            else:
+                video.dislikes.add(request.user)
+
+        return redirect('video', pk=pk)
+    else:
+        return redirect('login')
+
