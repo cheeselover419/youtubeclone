@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
 
 <div class="vstack align-items-center" style="margin: 20px;">
@@ -71,5 +71,9 @@
         {% endfor %}
     </ul>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<script src="{% static 'js/video_actions.js' %}"></script>
 
 {% endblock %}
