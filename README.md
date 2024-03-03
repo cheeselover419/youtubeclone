@@ -1,1 +1,1 @@
-youtube clone using Django, html, boostrap, js
+youtube clone using Django, React
