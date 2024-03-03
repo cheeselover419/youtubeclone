@@ -6,7 +6,7 @@ urlpatterns = [
     path('', views.home, name='home'),
 
     path('create-user', views.create_user, name='create-user'),
-    path('login', views.custom_login, name='login'),
+    path('login/', views.custom_login, name='login'),
     path('logout', views.custom_logout, name='logout'),
     path('create-channel', views.create_channel, name='create-channel'),
 
@@ -20,5 +20,8 @@ urlpatterns = [
     path('video-like/<int:pk>', views.video_like, name='video-like'),
     path('video-dislike/<int:pk>', views.video_dislike, name='video-dislike'),
     path('video-comment/<int:pk>', views.video_comment, name='video-comment'),
+
+
+    path('hello-world/', views.hello_world, name='hello_world'),
 
 ]
