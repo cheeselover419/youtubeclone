@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 
 from .models import Channel, Video, Comment
+from .serializers import *
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -15,12 +16,19 @@ from rest_framework.response import Response
 def hello_world(request):
     return Response({'message': 'Hello, World!'})
 
+# def home(request):
+
+#     videos = Video.objects.all().order_by('-upload_time')
+
+#     return render(request, 'home.html', {'videos': videos})
+
+@api_view(['GET'])
 def home(request):
-
-    videos = Video.objects.all().order_by('-upload_time')
-
-    return render(request, 'home.html', {'videos': videos})
-
+    if request.method == "GET":
+        data = Video.objects.all()
+        serializer = VideoSerializer(data, context={'request': request}, many=True)
+        return Response(serializer.data)
+        
 def create_user(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -56,23 +64,45 @@ def custom_logout(request):
     logout(request)
     return redirect('home')
 
-
+@api_view(['GET', 'POST'])
 def channel(request, username, pk):
-    user = User.objects.get(username=username)
-    channel = Channel.objects.get(user=user, id=pk)
-    videos = Video.objects.filter(channel=channel).order_by('-upload_time')
+    try:
+        user = User.objects.get(username=username)
+        channel = Channel.objects.get(user=user, id=pk)
+        videos = Video.objects.filter(channel=channel).order_by('-upload_time')
 
-    if request.method == 'POST':
-        action = request.POST['subscribe']
+    except (User.DoesNotExist, Channel.DoesNotExist):
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "POST":
+        action = request.data.get('subscribe')
 
         if action == 'unsubscribe':
             channel.subscribers.remove(request.user)
         else:
             channel.subscribers.add(request.user)
-
+        
         channel.save()
 
-    return render(request, 'channel.html', {'channel': channel, 'videos': videos})
+    serializer = ChannelSerializer(channel)
+    return Response({'channel': serializer.data, 'vidos': VideoSerializer(videos, many=True).data})
+
+# def channel(request, username, pk):
+#     user = User.objects.get(username=username)
+#     channel = Channel.objects.get(user=user, id=pk)
+#     videos = Video.objects.filter(channel=channel).order_by('-upload_time')
+
+#     if request.method == 'POST':
+#         action = request.POST['subscribe']
+
+#         if action == 'unsubscribe':
+#             channel.subscribers.remove(request.user)
+#         else:
+#             channel.subscribers.add(request.user)
+
+#         channel.save()
+
+#     return render(request, 'channel.html', {'channel': channel, 'videos': videos})
 
 
 def create_channel(request):

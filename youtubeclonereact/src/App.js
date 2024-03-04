@@ -1,11 +1,12 @@
 import React from "react";
-import HelloWorld from "./HelloWorld";
+import HelloWorld from "./components/HelloWorld";
+import Home from "./components/Home";
 import "./App.css";
 
 function App() {
   return (
     <div>
-      <HelloWorld />
+      <Home />
     </div>
   );
 }
