@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'youtube',
     'rest_framework',
     'corsheaders',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [

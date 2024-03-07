@@ -4,11 +4,14 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 
-from .models import Channel, Video, Comment
 from .serializers import *
+
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.authtoken.models import Token
+
 
 # Create your views here.
 
@@ -16,11 +19,7 @@ from rest_framework.response import Response
 def hello_world(request):
     return Response({'message': 'Hello, World!'})
 
-# def home(request):
 
-#     videos = Video.objects.all().order_by('-upload_time')
-
-#     return render(request, 'home.html', {'videos': videos})
 
 @api_view(['GET'])
 def home(request):
@@ -29,19 +28,20 @@ def home(request):
         serializer = VideoSerializer(data, context={'request': request}, many=True)
         return Response(serializer.data)
         
+@api_view(['POST'])
 def create_user(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = UserCreationForm(request.data)
 
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('home')
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key, 'user_id': user.id}, status=status.HTTP_201_CREATED)
 
-    else:
-        form = UserCreationForm()
+        return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    return render(request, 'create_user.html', {'form': form})
+
 
 def custom_login(request):
     if request.method == 'POST':
@@ -87,42 +87,14 @@ def channel(request, username, pk):
     serializer = ChannelSerializer(channel)
     return Response({'channel': serializer.data, 'vidos': VideoSerializer(videos, many=True).data})
 
-# def channel(request, username, pk):
-#     user = User.objects.get(username=username)
-#     channel = Channel.objects.get(user=user, id=pk)
-#     videos = Video.objects.filter(channel=channel).order_by('-upload_time')
-
-#     if request.method == 'POST':
-#         action = request.POST['subscribe']
-
-#         if action == 'unsubscribe':
-#             channel.subscribers.remove(request.user)
-#         else:
-#             channel.subscribers.add(request.user)
-
-#         channel.save()
-
-#     return render(request, 'channel.html', {'channel': channel, 'videos': videos})
-
-
+@api_view(['POST'])
 def create_channel(request):
-    if request.user.is_authenticated:
-        if request.method == "POST":
-            name = request.POST["channelName"]
-            pfp = request.FILES.get('channel_pfp')
-
-            if name and pfp:
-                channel = Channel(user=request.user, name=name, profile_picture=pfp)
-                channel.save()
-
-                return redirect('home')
-
-        else:
-            return render(request, 'create_channel.html')
-    else:
-        return redirect('login')
-
-    return render(request, 'create_channel.html')
+    if request.method == "POST":
+        serializer = ChannelSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 def video(request, pk):
@@ -225,3 +197,64 @@ def video_comment(request, pk):
 
     else:
         return redirect("login")
+
+
+
+
+# def home(request):
+
+#     videos = Video.objects.all().order_by('-upload_time')
+
+#     return render(request, 'home.html', {'videos': videos})
+
+# def channel(request, username, pk):
+#     user = User.objects.get(username=username)
+#     channel = Channel.objects.get(user=user, id=pk)
+#     videos = Video.objects.filter(channel=channel).order_by('-upload_time')
+
+#     if request.method == 'POST':
+#         action = request.POST['subscribe']
+
+#         if action == 'unsubscribe':
+#             channel.subscribers.remove(request.user)
+#         else:
+#             channel.subscribers.add(request.user)
+
+#         channel.save()
+
+#     return render(request, 'channel.html', {'channel': channel, 'videos': videos})
+
+# def create_user(request):
+#     if request.method == 'POST':
+#         form = UserCreationForm(request.POST)
+
+#         if form.is_valid():
+#             user = form.save()
+#             login(request, user)
+#             return redirect('home')
+
+#     else:
+#         form = UserCreationForm()
+
+#     return render(request, 'create_user.html', {'form': form})
+
+
+
+# def create_channel(request):
+#     if request.user.is_authenticated:
+#         if request.method == "POST":
+#             name = request.POST["channelName"]
+#             pfp = request.FILES.get('channel_pfp')
+
+#             if name and pfp:
+#                 channel = Channel(user=request.user, name=name, profile_picture=pfp)
+#                 channel.save()
+
+#                 return redirect('home')
+
+#         else:
+#             return render(request, 'create_channel.html')
+#     else:
+#         return redirect('login')
+
+#     return render(request, 'create_channel.html')

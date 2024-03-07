@@ -5,7 +5,6 @@ const VideoList = () => {
   const [videos, setVideos] = useState([]);
 
   useEffect(() => {
-    // Функция для получения данных из API
     const fetchVideos = async () => {
       try {
         const response = await axios.get("http://localhost:8000");
@@ -15,24 +14,34 @@ const VideoList = () => {
       }
     };
 
-    // Вызов функции при монтировании компонента
     fetchVideos();
   }, []);
 
+  const countLikes = (likes) => {
+    return new Set(likes.map((like) => like.user_id)).size;
+  };
+
   return (
-    <div>
+    <div style={{ textAlign: "center" }}>
       <h1>Video List</h1>
-      <ul>
+      <div
+        style={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}
+      >
         {videos.map((video) => (
-          <li key={video.id}>
+          <div key={video.id} style={{ margin: "10px", width: "300px" }}>
             <h3>{video.title}</h3>
             <p>{video.description}</p>
             {video.thumbnail && (
-              <img src={`${video.thumbnail}`} alt="Thumbnail" />
+              <img
+                src={`${video.thumbnail}`}
+                alt="Thumbnail"
+                style={{ width: "100%", height: "200px", objectFit: "cover" }}
+              />
             )}
-          </li>
+            <p>Likes: {countLikes(video.likes)}</p>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };

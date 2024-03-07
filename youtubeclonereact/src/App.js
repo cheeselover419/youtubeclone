@@ -1,13 +1,18 @@
 import React from "react";
-import HelloWorld from "./components/HelloWorld";
+
 import Home from "./components/Home";
+import CreateUser from "./components/CreateUser";
 import "./App.css";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 function App() {
   return (
-    <div>
-      <Home />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/create-user" element={<CreateUser />} />
+        <Route path="/" element={<Home />} />
+      </Routes>
+    </Router>
   );
 }
 
