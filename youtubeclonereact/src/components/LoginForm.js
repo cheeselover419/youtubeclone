@@ -1,47 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../AuthContext";
 
 const LoginForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [csrfToken, setCsrfToken] = useState("");
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchCsrfToken = async () => {
-      try {
-        const response = await axios.get(
-          "http://127.0.0.1:8000/get-csrf-token/"
-        );
-        setCsrfToken(response.data.csrfToken);
-      } catch (error) {
-        console.log("error fetching csrf token: ", error);
-      }
-    };
-    fetchCsrfToken();
-  }, []);
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/login/",
-        {
-          username,
-          password,
-        },
-        {
-          headers: {
-            "X-CSRFToken": csrfToken,
-          },
-        }
-      );
+      const response = await axios.post("http://localhost:8000/login/", {
+        username,
+        password,
+      });
 
       if (response.status === 200) {
-        console.log("login succesfull");
+        const user = response.data.user;
+        login(user);
+        setErrorMessage("");
         navigate("/");
       } else {
         console.log("Login Failed");
@@ -49,9 +30,10 @@ const LoginForm = () => {
       }
     } catch (error) {
       console.error("Error during login: ", error);
-      setErrorMessage("An error occurred duging login");
+      setErrorMessage("An error occurred during login");
     }
   };
+
   return (
     <div>
       <h2>Login</h2>

@@ -61,13 +61,19 @@ def custom_login(request):
 
         if user is not None:
             login(request, user)
-            return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key, 'user_id': user.id}, status=status.HTTP_200_OK)
         else:
             return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
     return Response({'message': 'Invalid request method'}, status=status.HTTP_400_BAD_REQUEST)
 
-
+@api_view(['GET'])
+def get_user_info(request):
+    user = request.user
+    return Response({
+        'username': user.username,
+    })
 
 def custom_logout(request):
     logout(request)

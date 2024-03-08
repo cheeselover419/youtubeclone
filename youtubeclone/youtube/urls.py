@@ -23,5 +23,6 @@ urlpatterns = [
 
 
     path('get-csrf-token/', views.get_csrf_token, name='get-csrf-token'),
+    path('user-info/', views.get_user_info, name='get-user-info'),
 
 ]
