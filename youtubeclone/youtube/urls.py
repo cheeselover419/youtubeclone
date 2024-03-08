@@ -22,6 +22,6 @@ urlpatterns = [
     path('video-comment/<int:pk>/', views.video_comment, name='video-comment'),
 
 
-    path('hello-world/', views.hello_world, name='hello_world'),
+    path('get-csrf-token/', views.get_csrf_token, name='get-csrf-token'),
 
 ]

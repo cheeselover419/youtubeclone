@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
 
 from .serializers import *
 
@@ -12,8 +11,19 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 
+from django.middleware.csrf import get_token
+
+
 
 # Create your views here.
+@api_view(['GET'])
+def get_csrf_token(request):
+    if request.method == "GET":
+        csrf_token = get_token(request)
+        return Response({'csrfToken': csrf_token})
+    else:
+        return Response({'error': 'Invalid request method'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET'])
 def hello_world(request):
@@ -41,23 +51,22 @@ def create_user(request):
 
         return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-
+@api_view(['POST'])
 def custom_login(request):
-    if request.method == 'POST':
-        username = request.POST["username"]
-        password = request.POST["password"]
+    if request.method == "POST":
+        username = request.data.get('username')
+        password = request.data.get('password')
 
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
             login(request, user)
-            return redirect('home')
+            return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
         else:
-            return redirect('login')
+            return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    else:
-        return render(request, 'login.html')
+    return Response({'message': 'Invalid request method'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 def custom_logout(request):
@@ -258,3 +267,21 @@ def video_comment(request, pk):
 #         return redirect('login')
 
 #     return render(request, 'create_channel.html')
+
+
+
+# def custom_login(request):
+#     if request.method == 'POST':
+#         username = request.POST["username"]
+#         password = request.POST["password"]
+
+#         user = authenticate(request, username=username, password=password)
+
+#         if user is not None:
+#             login(request, user)
+#             return redirect('home')
+#         else:
+#             return redirect('login')
+
+#     else:
+#         return render(request, 'login.html')
