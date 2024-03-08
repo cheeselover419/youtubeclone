@@ -1,1 +1,1 @@
-youtube clone using Django, React
+youtube clone using Django RestApi, React
